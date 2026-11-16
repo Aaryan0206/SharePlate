@@ -21,6 +21,7 @@ import FoodCard from '../components/listings/FoodCard';
 import ClaimPortionModal from '../components/listings/ClaimPortionModal';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
+import { MOCK_LISTINGS } from '../data/mockListings';
 
 const CATEGORIES = [
   { id: 'all', label: 'All Items' },
@@ -101,7 +102,20 @@ export default function BrowsePage() {
       setTotalPages(data.totalPages || 1);
       setTotalListings(data.totalListings || 0);
     } catch (err) {
-      setError(err.message);
+      // Graceful fallback for static demo hosting (e.g. GitHub Pages without local backend)
+      let fallback = MOCK_LISTINGS;
+      if (category && category !== 'all') {
+        const catClean = category.toLowerCase().replace(/-/g, ' ');
+        fallback = fallback.filter((item) => (item.category || '').toLowerCase().replace(/-/g, ' ') === catClean);
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        fallback = fallback.filter((item) => (item.title || '').toLowerCase().includes(q) || (item.description || '').toLowerCase().includes(q));
+      }
+      setListings(fallback);
+      setTotalPages(1);
+      setTotalListings(fallback.length);
+      setError(null);
     } finally {
       setLoading(false);
     }

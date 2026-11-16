@@ -23,6 +23,7 @@ import FoodDetailModal from '../components/listings/FoodDetailModal';
 import ClaimPortionModal from '../components/listings/ClaimPortionModal';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
+import { MOCK_LISTINGS } from '../data/mockListings';
 
 // Location presets for demo & testing
 const LOCATION_PRESETS = [
@@ -95,7 +96,19 @@ export default function NearbyMapPage() {
         setSelectedListing(null);
       }
     } catch (err) {
-      setError(err.message);
+      // Graceful fallback for static demo hosting (e.g. GitHub Pages without local backend)
+      const fallback = MOCK_LISTINGS.map((item) => ({
+        ...item,
+        _id: item.id,
+        location: {
+          type: 'Point',
+          coordinates: item.pickupAddress?.coordinates || [77.5946, 12.9716],
+        },
+        distanceKm: item.pickupAddress?.distanceKm || 1.2,
+      }));
+      setListings(fallback);
+      setSelectedListing(fallback[0] || null);
+      setError(null);
     } finally {
       setLoading(false);
     }

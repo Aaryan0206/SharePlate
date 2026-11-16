@@ -50,7 +50,7 @@ function DashboardRedirect() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col bg-cream-50 text-charcoal-800 font-sans selection:bg-forest-100 selection:text-forest-900">
           <Navbar />
