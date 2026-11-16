@@ -1,0 +1,21 @@
+{
+  "name": "shareplate-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SharePlate — Surplus Food Sharing Platform",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "client": "npm --prefix client run dev"
+  },
+  "keywords": [
+    "food-waste",
+    "surplus-food",
+    "mongodb",
+    "geojson",
+    "react",
+    "express"
+  ],
+  "author": "SharePlate Team",
+  "license": "ISC"
+}
