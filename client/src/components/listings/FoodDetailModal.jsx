@@ -64,7 +64,7 @@ export default function FoodDetailModal({ listing, isOpen, onClose, onReserveSuc
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     if (hours < 1) return `${minutes}m left`;
     if (hours < 24) return `${hours}h ${minutes}m left`;
-    return `${Math.floor(hours / 24)}d left`;
+    return `${Math.ceil(hours / 24)}d left`;
   };
 
   const pickupInstructions = listing.pickupInstructions || listing.pickupWindow?.instructions || '';

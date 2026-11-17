@@ -26,7 +26,7 @@ export default function FoodCard({ listing, onSelect, onReserve }) {
     if (hours < 1) return { text: `${minutes}m left`, urgent: true };
     if (hours < 6) return { text: `${hours}h ${minutes}m left`, urgent: true };
     if (hours < 24) return { text: `${hours}h left`, urgent: false };
-    const days = Math.floor(hours / 24);
+    const days = Math.ceil(hours / 24);
     return { text: `${days}d left`, urgent: false };
   };
 
