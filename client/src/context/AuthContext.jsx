@@ -12,6 +12,22 @@ function createOfflineUser(email, roleHint, extra = {}) {
     role = 'admin';
     name = extra.name || 'Platform Administrator';
     org = extra.organizationType || 'Platform Governance';
+  } else if (normalized === 'donor@metrograndhotel.com') {
+    role = 'donor';
+    name = extra.name || 'Metro Grand Hotel & Banquet';
+    org = extra.organizationType || 'Luxury Hotel & Banquets';
+  } else if (normalized === 'donor@dailyfreshcoop.org') {
+    role = 'donor';
+    name = extra.name || 'Daily Fresh Organic Co-op';
+    org = extra.organizationType || 'Organic Farm Collective';
+  } else if (normalized === 'donor@goldencrust.com') {
+    role = 'donor';
+    name = extra.name || 'Golden Crust French Patisserie';
+    org = extra.organizationType || 'Artisanal French Bakery';
+  } else if (normalized === 'donor@annapurnakitchen.org') {
+    role = 'donor';
+    name = extra.name || 'Annapurna Community Kitchen';
+    org = extra.organizationType || 'Community Relief Kitchen';
   } else if (normalized === 'donor@greenhearth.com' || normalized.includes('donor')) {
     role = 'donor';
     name = extra.name || 'Green Hearth Bakery';

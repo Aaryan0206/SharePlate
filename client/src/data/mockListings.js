@@ -536,6 +536,150 @@ export const MOCK_LISTINGS = [
     allergens: ['Dairy (Milk)'],
     status: 'Available',
     createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'sp-116',
+    title: "Executive Chef's Gourmet Rice Pilaf & Roasted Veggie Platters",
+    category: 'cooked-meals',
+    description: 'Five-star banquet surplus prepared by Metro Grand culinary team. Premium aged basmati tossed with wild herbs, roasted zucchini, bell peppers, and glazed carrots. Kept hot under food warmers and packed in sealed containers.',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
+    quantity: 25,
+    unit: 'boxes',
+    servings: 25,
+    donor: {
+      id: 'd-9',
+      name: 'Metro Grand Hotel & Banquet',
+      email: 'donor@metrograndhotel.com',
+      type: 'Luxury Hotel & Banquets',
+      verified: true,
+      rating: 4.95,
+      totalDonations: 82
+    },
+    pickupAddress: {
+      facility: 'Grand Ballroom Service Gate',
+      street: '100 MG Road, Central Plaza',
+      city: 'Metro City',
+      distanceKm: 1.2,
+      coordinates: [77.6100, 12.9720]
+    },
+    pickupWindow: {
+      start: '14:00',
+      end: '18:00',
+      instructions: 'Enter via rear service bay Gate 3, check in with Banquet Steward'
+    },
+    expiryTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(), // Expires after 2 days
+    dietary: ['Vegetarian', 'Nut-Free'],
+    allergens: ['Dairy (Butter)'],
+    status: 'Available',
+    createdAt: new Date(Date.now() - 20 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'sp-117',
+    title: 'Farm Harvest Crate — Crisp Golden Apples & Seedless Table Grapes',
+    category: 'fruits-vegetables',
+    description: 'Cooperative farm direct intake surplus. Sweet crunchy crisp golden delicious apples and sweet green seedless grapes packed in wooden crates. 100% natural, farm-fresh, wholesome produce.',
+    image: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80',
+    quantity: 20,
+    unit: 'kg',
+    servings: 45,
+    donor: {
+      id: 'd-10',
+      name: 'Daily Fresh Organic Co-op',
+      email: 'donor@dailyfreshcoop.org',
+      type: 'Organic Farm Collective',
+      verified: true,
+      rating: 4.9,
+      totalDonations: 114
+    },
+    pickupAddress: {
+      facility: 'Farm Co-op Distribution Dock',
+      street: '42 Farmway Lane, Green Belt',
+      city: 'Metro City',
+      distanceKm: 2.8,
+      coordinates: [77.6250, 12.9400]
+    },
+    pickupWindow: {
+      start: '09:00',
+      end: '17:00',
+      instructions: 'Staff at Bay 1 will assist with crate transfer'
+    },
+    expiryTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(), // Expires after 2 days
+    dietary: ['Vegan', 'Gluten-Free', 'Raw Produce'],
+    allergens: [],
+    status: 'Available',
+    createdAt: new Date(Date.now() - 40 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'sp-118',
+    title: 'Artisan French Brioche Loaves & Cinnamon Danish Pastries',
+    category: 'bakery',
+    description: 'Golden buttery French brioche loaves and cinnamon spiced sugar-glazed Danishes baked by Golden Crust masters. Rich, tender crumb, perfect for breakfast tables and community center teas.',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
+    quantity: 18,
+    unit: 'boxes',
+    servings: 36,
+    donor: {
+      id: 'd-11',
+      name: 'Golden Crust French Patisserie',
+      email: 'donor@goldencrust.com',
+      type: 'Artisanal French Bakery',
+      verified: true,
+      rating: 5.0,
+      totalDonations: 63
+    },
+    pickupAddress: {
+      facility: 'Side Patisserie Counter',
+      street: '88 Croissant Boulevard',
+      city: 'Metro City',
+      distanceKm: 2.2,
+      coordinates: [77.6350, 12.9650]
+    },
+    pickupWindow: {
+      start: '16:30',
+      end: '19:30',
+      instructions: 'Please show pickup code at side collection register'
+    },
+    expiryTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(), // Expires after 2 days
+    dietary: ['Vegetarian'],
+    allergens: ['Wheat (Gluten)', 'Dairy', 'Eggs'],
+    status: 'Available',
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'sp-119',
+    title: 'Nutritious Vegetarian Thali Boxes (Dal Makhani, Roti & Jeera Rice)',
+    category: 'cooked-meals',
+    description: 'Freshly packed homestyle meal thalis from Annapurna Community Kitchen. Slow-simmered creamy black lentils, 3 whole wheat rotis, steamed cumin basmati rice, and homemade pickle in compartmentalized food-safe containers.',
+    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80',
+    quantity: 35,
+    unit: 'boxes',
+    servings: 35,
+    donor: {
+      id: 'd-12',
+      name: 'Annapurna Community Kitchen',
+      email: 'donor@annapurnakitchen.org',
+      type: 'Community Relief Kitchen',
+      verified: true,
+      rating: 4.98,
+      totalDonations: 420
+    },
+    pickupAddress: {
+      facility: 'Community Kitchen Dispatch',
+      street: '15 Seva Road, Gandhi Square',
+      city: 'Metro City',
+      distanceKm: 1.6,
+      coordinates: [77.5850, 12.9600]
+    },
+    pickupWindow: {
+      start: '12:00',
+      end: '16:00',
+      instructions: 'Volunteers at Front Seva Desk will hand over pre-packed insulated cartons'
+    },
+    expiryTime: new Date(Date.now() + 48 * 3600 * 1000).toISOString(), // Expires after 2 days
+    dietary: ['Vegetarian', 'Nut-Free'],
+    allergens: ['Dairy (Butter/Ghee)', 'Wheat (Gluten)'],
+    status: 'Available',
+    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
   }
 ];
 
@@ -551,6 +695,10 @@ export const MOCK_IMPACT_STATS = {
 export const MOCK_PARTNERS = [
   { name: 'City University Dining', type: 'Campus Dining Partner', logo: 'GraduationCap' },
   { name: 'Flour & Hearth Bakery', type: 'Artisan Bakery', logo: 'Utensils' },
+  { name: 'Metro Grand Hotel', type: 'Luxury Hotel & Banquet Partner', logo: 'Building2' },
+  { name: 'Daily Fresh Co-op', type: 'Organic Farm Collective', logo: 'Apple' },
+  { name: 'Golden Crust Patisserie', type: 'French Bakery Partner', logo: 'Utensils' },
+  { name: 'Annapurna Relief Kitchen', type: 'Community Kitchen NGO', logo: 'HeartHandshake' },
   { name: 'Green Valley Organics', type: 'Produce Partner', logo: 'Apple' },
   { name: 'Hope Community Center', type: 'Community Food Bank', logo: 'HeartHandshake' },
   { name: 'Sunrise Food Mart', type: 'Retail Grocer', logo: 'Store' },

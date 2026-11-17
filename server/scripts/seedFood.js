@@ -21,25 +21,178 @@ const seedFoodListings = async () => {
     await FoodListing.collection.createIndex({ location: '2dsphere' }, { sparse: true });
     console.log('[Seed Food] 2dsphere sparse index verified on FoodListing.location.');
 
-    // Find test donor
-    let donor = await User.findOne({ email: 'donor@greenhearth.com' });
-    if (!donor) {
-      donor = await User.findOne({ role: 'donor' });
+    // Provision default donors and new donors
+    const donorDefinitions = [
+      {
+        name: 'Green Hearth Bakery',
+        email: 'donor@greenhearth.com',
+        password: 'Donor@SharePlate2026',
+        role: 'donor',
+        organizationType: 'Artisan Bakery',
+        phone: '+1-555-0102',
+        isActive: true,
+      },
+      {
+        name: 'Metro Grand Hotel & Banquet',
+        email: 'donor@metrograndhotel.com',
+        password: 'Donor@SharePlate2026',
+        role: 'donor',
+        organizationType: 'Luxury Hotel & Banquets',
+        phone: '+1-555-0240',
+        isActive: true,
+      },
+      {
+        name: 'Daily Fresh Organic Co-op',
+        email: 'donor@dailyfreshcoop.org',
+        password: 'Donor@SharePlate2026',
+        role: 'donor',
+        organizationType: 'Organic Farm Collective',
+        phone: '+1-555-0255',
+        isActive: true,
+      },
+      {
+        name: 'Golden Crust French Patisserie',
+        email: 'donor@goldencrust.com',
+        password: 'Donor@SharePlate2026',
+        role: 'donor',
+        organizationType: 'Artisanal French Bakery',
+        phone: '+1-555-0268',
+        isActive: true,
+      },
+      {
+        name: 'Annapurna Community Kitchen',
+        email: 'donor@annapurnakitchen.org',
+        password: 'Donor@SharePlate2026',
+        role: 'donor',
+        organizationType: 'Community Relief Kitchen',
+        phone: '+1-555-0275',
+        isActive: true,
+      },
+    ];
+
+    const donorMap = {};
+    for (const d of donorDefinitions) {
+      let u = await User.findOne({ email: d.email });
+      if (!u) {
+        u = await User.create(d);
+        console.log(`[Seed Food] Provisioned new donor account: ${u.name} (${u.email})`);
+      } else {
+        console.log(`[Seed Food] Verified existing donor account: ${u.name} (${u.email})`);
+      }
+      donorMap[d.email] = u;
     }
 
-    if (!donor) {
-      console.error('[Seed Food] No donor found! Please run seedAdmin.js or register a donor first.');
-      process.exit(1);
-    }
+    const defaultDonor = donorMap['donor@greenhearth.com'];
+    const hotelDonor = donorMap['donor@metrograndhotel.com'];
+    const farmDonor = donorMap['donor@dailyfreshcoop.org'];
+    const bakeryDonor = donorMap['donor@goldencrust.com'];
+    const kitchenDonor = donorMap['donor@annapurnakitchen.org'];
 
-    console.log(`[Seed Food] Seeding geospatial listings under donor: ${donor.name} (${donor.email})`);
-
-    // Clear existing sample listings for this donor
-    await FoodListing.deleteMany({ donor: donor._id });
+    // Clear existing sample listings for these donors
+    const donorIds = Object.values(donorMap).map((d) => d._id);
+    await FoodListing.deleteMany({ donor: { $in: donorIds } });
 
     const now = Date.now();
+    const twoDaysMs = 48 * 3600 * 1000; // Exactly 2 days (48 hours)
 
     const sampleListings = [
+      // --- NEW DONOR 1: Metro Grand Hotel & Banquet (Expires in 2 days) ---
+      {
+        title: "Executive Chef's Gourmet Rice Pilaf & Roasted Veggie Platters",
+        description: 'Five-star banquet surplus prepared by Metro Grand culinary team. Premium aged basmati tossed with wild herbs, roasted zucchini, bell peppers, and glazed carrots. Kept hot under food warmers and packed in sealed containers.',
+        category: 'cooked meals',
+        quantity: 25,
+        unit: 'boxes',
+        servingsCount: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
+        donor: hotelDonor._id,
+        pickupAddress: 'Grand Ballroom Service Gate, 100 MG Road, Central Plaza',
+        pickupInstructions: 'Enter via rear service bay Gate 3, check in with Banquet Steward',
+        location: {
+          type: 'Point',
+          coordinates: [77.6100, 12.9720],
+        },
+        pickupStartTime: new Date(now + 60 * 60 * 1000),
+        pickupEndTime: new Date(now + 18 * 3600 * 1000),
+        expiryTime: new Date(now + twoDaysMs), // Expires after 2 days
+        allergenInformation: 'Contains Dairy (Butter). Nut-free.',
+        foodHandlingNotes: 'Store below 5°C or consume within 2 hours of reheat.',
+        status: 'available',
+      },
+
+      // --- NEW DONOR 2: Daily Fresh Organic Co-op (Expires in 2 days) ---
+      {
+        title: 'Farm Harvest Crate — Crisp Golden Apples & Seedless Table Grapes',
+        description: 'Cooperative farm direct intake surplus. Sweet crunchy crisp golden delicious apples and sweet green seedless grapes packed in wooden crates. 100% natural, farm-fresh, wholesome produce.',
+        category: 'fruits and vegetables',
+        quantity: 20,
+        unit: 'kg',
+        servingsCount: 45,
+        imageUrl: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80',
+        donor: farmDonor._id,
+        pickupAddress: 'Farm Co-op Distribution Dock, 42 Farmway Lane, Green Belt',
+        pickupInstructions: 'Staff at Bay 1 will assist with crate transfer',
+        location: {
+          type: 'Point',
+          coordinates: [77.6250, 12.9400],
+        },
+        pickupStartTime: new Date(now + 30 * 60 * 1000),
+        pickupEndTime: new Date(now + 24 * 3600 * 1000),
+        expiryTime: new Date(now + twoDaysMs), // Expires after 2 days
+        allergenInformation: 'Raw produce. 100% Allergen-free.',
+        foodHandlingNotes: 'Keep in cool dry fruit cellar.',
+        status: 'available',
+      },
+
+      // --- NEW DONOR 3: Golden Crust French Patisserie (Expires in 2 days) ---
+      {
+        title: 'Artisan French Brioche Loaves & Cinnamon Danish Pastries',
+        description: 'Golden buttery French brioche loaves and cinnamon spiced sugar-glazed Danishes baked by Golden Crust masters. Rich, tender crumb, perfect for breakfast tables and community center teas.',
+        category: 'bakery',
+        quantity: 18,
+        unit: 'boxes',
+        servingsCount: 36,
+        imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
+        donor: bakeryDonor._id,
+        pickupAddress: 'Side Patisserie Counter, 88 Croissant Boulevard',
+        pickupInstructions: 'Please show pickup code at side collection register',
+        location: {
+          type: 'Point',
+          coordinates: [77.6350, 12.9650],
+        },
+        pickupStartTime: new Date(now + 45 * 60 * 1000),
+        pickupEndTime: new Date(now + 12 * 3600 * 1000),
+        expiryTime: new Date(now + twoDaysMs), // Expires after 2 days
+        allergenInformation: 'Contains Wheat (Gluten), Dairy, Eggs.',
+        foodHandlingNotes: 'Store in airtight containers or freeze.',
+        status: 'available',
+      },
+
+      // --- NEW DONOR 4: Annapurna Community Kitchen (Expires in 2 days) ---
+      {
+        title: 'Nutritious Vegetarian Thali Boxes (Dal Makhani, Roti & Jeera Rice)',
+        description: 'Freshly packed homestyle meal thalis from Annapurna Community Kitchen. Slow-simmered creamy black lentils, 3 whole wheat rotis, steamed cumin basmati rice, and homemade pickle in compartmentalized food-safe containers.',
+        category: 'cooked meals',
+        quantity: 35,
+        unit: 'boxes',
+        servingsCount: 35,
+        imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80',
+        donor: kitchenDonor._id,
+        pickupAddress: 'Community Kitchen Dispatch, 15 Seva Road, Gandhi Square',
+        pickupInstructions: 'Volunteers at Front Seva Desk will hand over pre-packed insulated cartons',
+        location: {
+          type: 'Point',
+          coordinates: [77.5850, 12.9600],
+        },
+        pickupStartTime: new Date(now + 30 * 60 * 1000),
+        pickupEndTime: new Date(now + 8 * 3600 * 1000),
+        expiryTime: new Date(now + twoDaysMs), // Expires after 2 days
+        allergenInformation: 'Contains Dairy (Butter/Ghee), Wheat (Gluten).',
+        foodHandlingNotes: 'Consume hot or refrigerate within 2 hours.',
+        status: 'available',
+      },
+
+      // --- EXISTING DONOR LISTINGS ---
       {
         title: 'Surplus Lunch Buffet — Basmati Rice & Paneer Butter Masala',
         description: 'Freshly prepared convention buffet surplus. Kept under commercial warmers at 65°C and cleanly packed in individual sanitized containers. Rich, aromatic and nourishing.',
@@ -48,7 +201,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 24,
         imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Student Center, Block B Ground Floor, 45 University Avenue',
         pickupInstructions: 'Enter through Gate 2 service dock and ask for Dining Manager on duty',
         location: {
@@ -70,7 +223,7 @@ const seedFoodListings = async () => {
         unit: 'loaves',
         servingsCount: 32,
         imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Flour & Hearth Artisan Bakery, 12 Baker Street, Market Square',
         pickupInstructions: 'Pick up at the front counter. Please bring a clean tote or bag.',
         location: {
@@ -92,7 +245,7 @@ const seedFoodListings = async () => {
         unit: 'kg',
         servingsCount: 40,
         imageUrl: 'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Loading Dock C, Green Valley Organics, 88 Orchard Road',
         pickupInstructions: 'Ring buzzer at dispatch bay; staff will assist with crates',
         location: {
@@ -114,7 +267,7 @@ const seedFoodListings = async () => {
         unit: 'servings',
         servingsCount: 30,
         imageUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Silver Oak Banquet Hall, 210 Palace Cross Road',
         pickupInstructions: 'Report to Kitchen Dispatch security desk at West Wing',
         location: {
@@ -136,7 +289,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 48,
         imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Flour & Hearth Artisan Bakery, 12 Baker Street, Market Square',
         pickupInstructions: 'Show SharePlate donor listing to counter attendant',
         location: {
@@ -158,7 +311,7 @@ const seedFoodListings = async () => {
         unit: 'packets',
         servingsCount: 25,
         imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Sunrise Supermart, 72 Commercial Boulevard',
         pickupInstructions: 'Customer service desk at primary entrance',
         location: {
@@ -180,7 +333,7 @@ const seedFoodListings = async () => {
         unit: 'kg',
         servingsCount: 30,
         imageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Urban Roots Greenhouse, 104 Indiranagar 100ft Road',
         pickupInstructions: 'Enter through side green gate; dispatch team will load crates',
         location: {
@@ -202,7 +355,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 20,
         imageUrl: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Spice Route Express, 54 Church Street, Brigade Plaza',
         pickupInstructions: 'Collect at the takeout window with your pickup code',
         location: {
@@ -224,7 +377,7 @@ const seedFoodListings = async () => {
         unit: 'packs',
         servingsCount: 36,
         imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Sunrise Supermart, 72 Commercial Boulevard',
         pickupInstructions: 'Collect at Customer Service Desk',
         location: {
@@ -246,7 +399,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 60,
         imageUrl: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Community Harvest Food Depot, 19 Koramangala 5th Block',
         pickupInstructions: 'Volunteers at Loading Bay 2 will assist with vehicle loading',
         location: {
@@ -268,7 +421,7 @@ const seedFoodListings = async () => {
         unit: 'packets',
         servingsCount: 30,
         imageUrl: 'https://images.unsplash.com/photo-1585478259715-876acc5be8eb?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Flour & Hearth Artisan Bakery, 12 Baker Street, Market Square',
         pickupInstructions: 'Collect at front counter; cream cheese is packed in thermal tote',
         location: {
@@ -290,7 +443,7 @@ const seedFoodListings = async () => {
         unit: 'kg',
         servingsCount: 32,
         imageUrl: 'https://images.unsplash.com/photo-1546548970-71785318a17b?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Loading Dock C, Green Valley Organics, 88 Orchard Road',
         pickupInstructions: 'Collect from loading bay dispatch',
         location: {
@@ -312,7 +465,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 22,
         imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Student Center, Block B Ground Floor, 45 University Avenue',
         pickupInstructions: 'Enter via Gate 2, pick up at Hot Food Dispense counter',
         location: {
@@ -334,7 +487,7 @@ const seedFoodListings = async () => {
         unit: 'boxes',
         servingsCount: 45,
         imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Community Harvest Food Depot, 19 Koramangala 5th Block',
         pickupInstructions: 'Collect at Volunteer Dispatch Desk',
         location: {
@@ -356,7 +509,7 @@ const seedFoodListings = async () => {
         unit: 'servings',
         servingsCount: 16,
         imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Student Center, Block B Ground Floor, 45 University Avenue',
         pickupInstructions: 'Please bring your own thermal cups or borrow sanitized stainless mugs',
         location: {
@@ -378,7 +531,7 @@ const seedFoodListings = async () => {
         unit: 'loaves',
         servingsCount: 16,
         imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Highway Farmhouse Shed 4, Rural Bypass Highway 7',
         pickupInstructions: 'Rural pickup only',
         location: {
@@ -400,7 +553,7 @@ const seedFoodListings = async () => {
         unit: 'packets',
         servingsCount: 10,
         imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=800&q=80',
-        donor: donor._id,
+        donor: defaultDonor._id,
         pickupAddress: 'Community Archives Depot',
         pickupInstructions: 'Legacy pickup instructions',
         pickupStartTime: new Date(now + 30 * 60 * 1000),
@@ -421,8 +574,11 @@ const seedFoodListings = async () => {
     }));
 
     const created = await FoodListing.insertMany(preparedListings);
-    console.log(`[Seed Food Success] Successfully seeded ${created.length} geospatial food listings into MongoDB!`);
-    console.log(`[Seed Food Compass] Open MongoDB Compass -> 'shareplate' database -> 'foodlistings' collection.`);
+    console.log(`[Seed Food Success] Successfully seeded ${created.length} food listings into MongoDB!`);
+    console.log(`[Seed Food Donors] Seeded active donors:`);
+    donorDefinitions.forEach((d) => {
+      console.log(`   - ${d.name} (${d.email}) [Password: ${d.password}]`);
+    });
 
     process.exit(0);
   } catch (error) {
