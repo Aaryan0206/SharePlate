@@ -101,31 +101,75 @@ export default function CreateDonationPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/food', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          ...formData,
-          quantity: Number(formData.quantity),
-          servingsCount: formData.servingsCount ? Number(formData.servingsCount) : null,
-          pickupStartTime: new Date(formData.pickupStartTime).toISOString(),
-          pickupEndTime: new Date(formData.pickupEndTime).toISOString(),
-          expiryTime: new Date(formData.expiryTime).toISOString(),
-          location: {
-            type: 'Point',
-            coordinates: coordinates,
-          },
-        }),
-      });
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        category: formData.category,
+        unit: formData.unit,
+        imageUrl: formData.imageUrl.trim() || undefined,
+        pickupAddress: formData.pickupAddress.trim(),
+        pickupInstructions: formData.pickupInstructions.trim() || undefined,
+        quantity: Number(formData.quantity),
+        servingsCount: formData.servingsCount ? Number(formData.servingsCount) : null,
+        pickupStartTime: new Date(formData.pickupStartTime).toISOString(),
+        pickupEndTime: new Date(formData.pickupEndTime).toISOString(),
+        expiryTime: new Date(formData.expiryTime).toISOString(),
+        location: {
+          type: 'Point',
+          coordinates: coordinates,
+        },
+      };
 
-      const data = await res.json();
+      let data = null;
+      try {
+        const res = await fetch('/api/food', {
+          method: 'POST',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        });
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to publish food listing');
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+        }
+
+        if (res.ok && data?.success && data.listing) {
+          setCreatedListing(data.listing);
+          return;
+        } else if (!res.ok && data?.message) {
+          throw new Error(data.message);
+        }
+      } catch (networkOrParseErr) {
+        if (networkOrParseErr.message && !networkOrParseErr.message.includes('JSON') && !networkOrParseErr.message.includes('fetch')) {
+          throw networkOrParseErr;
+        }
       }
 
-      setCreatedListing(data.listing);
+      // Offline / GitHub Pages fallback
+      const offlineListing = {
+        _id: 'listing-' + Date.now(),
+        ...payload,
+        availableQuantity: Number(payload.quantity),
+        reservedQuantity: 0,
+        collectedQuantity: 0,
+        originalQuantity: Number(payload.quantity),
+        status: 'available',
+        donor: {
+          _id: user?._id || 'donor-1',
+          name: user?.name || 'Green Hearth Bakery',
+          organizationType: user?.organizationType || 'Food Donor',
+        },
+        createdAt: new Date().toISOString(),
+      };
+
+      try {
+        const saved = JSON.parse(localStorage.getItem('shareplate_custom_listings') || '[]');
+        saved.unshift(offlineListing);
+        localStorage.setItem('shareplate_custom_listings', JSON.stringify(saved));
+      } catch (e) {}
+
+      setCreatedListing(offlineListing);
     } catch (err) {
       setServerError(err.message || 'An error occurred while creating listing.');
     } finally {

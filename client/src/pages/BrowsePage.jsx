@@ -103,7 +103,11 @@ export default function BrowsePage() {
       setTotalListings(data.totalListings || 0);
     } catch (err) {
       // Graceful fallback for static demo hosting (e.g. GitHub Pages without local backend)
-      let fallback = MOCK_LISTINGS;
+      let custom = [];
+      try {
+        custom = JSON.parse(localStorage.getItem('shareplate_custom_listings') || '[]');
+      } catch (e) {}
+      let fallback = [...custom, ...MOCK_LISTINGS];
       if (category && category !== 'all') {
         const catClean = category.toLowerCase().replace(/-/g, ' ');
         fallback = fallback.filter((item) => (item.category || '').toLowerCase().replace(/-/g, ' ') === catClean);

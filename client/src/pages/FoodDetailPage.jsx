@@ -22,6 +22,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+import { MOCK_LISTINGS } from '../data/mockListings';
 
 export default function FoodDetailPage() {
   const { id } = useParams();
@@ -43,6 +44,10 @@ export default function FoodDetailPage() {
     setError(null);
     try {
       const res = await fetch(`/api/food/${id}`);
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('OFFLINE_OR_STATIC');
+      }
       const data = await res.json();
 
       if (!res.ok || !data.success || !data.listing) {
@@ -53,7 +58,21 @@ export default function FoodDetailPage() {
       const rem = data.listing.availableQuantity ?? data.listing.quantity;
       setReserveQty((prev) => Math.min(Math.max(1, prev), Math.max(1, Math.floor(rem) || rem)));
     } catch (err) {
-      setError(err.message);
+      // Fallback for static demo hosting / offline
+      let custom = [];
+      try {
+        custom = JSON.parse(localStorage.getItem('shareplate_custom_listings') || '[]');
+      } catch (e) {}
+      const found = custom.find((l) => l._id === id || l.id === id) ||
+                    MOCK_LISTINGS.find((l) => l._id === id || l.id === id || l.id === 'sp-101');
+      if (found) {
+        setListing(found);
+        const rem = found.availableQuantity ?? found.quantity;
+        setReserveQty((prev) => Math.min(Math.max(1, prev), Math.max(1, Math.floor(rem) || rem)));
+        setError(null);
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -71,25 +90,51 @@ export default function FoodDetailPage() {
     setReserving(true);
 
     try {
-      const res = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          foodListingId: listing._id,
-          quantityReserved: Number(reserveQty),
-        }),
-      });
-      const data = await res.json();
+      let isLiveSuccess = false;
+      let liveRes = null;
 
-      if (!res.ok || !data.success) {
-        // Refresh listing availability on conflict or error
-        fetchListing();
-        throw new Error(data.message || 'Failed to reserve food listing');
+      try {
+        const res = await fetch('/api/reservations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            foodListingId: listing._id || listing.id,
+            quantityReserved: Number(reserveQty),
+          }),
+        });
+
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          if (res.ok && data.success) {
+            isLiveSuccess = true;
+            liveRes = data.reservation;
+          } else if (!res.ok && data?.message) {
+            fetchListing();
+            throw new Error(data.message);
+          }
+        }
+      } catch (e) {
+        if (e.message && !e.message.includes('JSON') && !e.message.includes('fetch')) throw e;
       }
 
-      setCreatedReservation(data.reservation);
-      fetchListing();
+      if (isLiveSuccess && liveRes) {
+        setCreatedReservation(liveRes);
+        fetchListing();
+        return;
+      }
+
+      // Offline / GitHub Pages reservation fallback
+      const mockCode = 'RES' + Math.floor(1000 + Math.random() * 9000);
+      const demoReservation = {
+        _id: 'res-' + Date.now(),
+        quantityReserved: Number(reserveQty),
+        unit: listing.unit || 'portions',
+        pickupCode: mockCode,
+        pickupDeadline: listing.pickupEndTime || new Date(Date.now() + 4 * 3600 * 1000).toISOString(),
+      };
+      setCreatedReservation(demoReservation);
     } catch (err) {
       setReserveError(err.message);
     } finally {
