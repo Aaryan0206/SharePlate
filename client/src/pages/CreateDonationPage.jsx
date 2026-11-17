@@ -21,7 +21,7 @@ import Badge from '../components/common/Badge';
 import LocationPickerModal from '../components/map/LocationPickerModal';
 
 export default function CreateDonationPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
 
   // Helper to get formatted default local datetime strings
@@ -119,6 +119,12 @@ export default function CreateDonationPage() {
           coordinates: coordinates,
         },
       };
+
+      const headers = { 'Content-Type': 'application/json' };
+      const authToken = token || localStorage.getItem('shareplate_token');
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
 
       let data = null;
       try {
